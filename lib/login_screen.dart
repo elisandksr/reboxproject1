@@ -124,17 +124,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   children: [
                     // Logo dan Judul
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white.withOpacity(0.2),
                       ),
                       child: Image.asset(
-                        'assets/logo_rebox.png',
-                        height: 90,
+                        'assets/logo_rebox1.png',
+                        height: 140,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     
                     const Text(
                       "REBOX",

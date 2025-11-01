@@ -216,17 +216,17 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
                     
                     // Logo dan Judul
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white.withOpacity(0.2),
                       ),
                       child: Image.asset(
-                        'assets/logo_rebox.png',
-                        height: 80,
+                        'assets/logo_rebox1.png',
+                        height: 140,
                       ),
                     ),
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 10),
                     
                     const Text(
                       "REBOX",
