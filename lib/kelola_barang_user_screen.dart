@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'admin_dashboard_screen.dart';
 import 'user_data.dart';
 
-class KelolaBarangScreen extends StatefulWidget {
-  const KelolaBarangScreen({super.key});
+class KelolaBarangUserScreen extends StatefulWidget {
+  const KelolaBarangUserScreen({super.key});
 
   @override
-  State<KelolaBarangScreen> createState() => _KelolaBarangScreenState();
+  State<KelolaBarangUserScreen> createState() => _KelolaBarangScreenState();
 }
 
-class _KelolaBarangScreenState extends State<KelolaBarangScreen> {
+class _KelolaBarangScreenState extends State<KelolaBarangUserScreen> {
   // Data barang (akan diisi dari donasi user)
   // Status: 'pending', 'disetujui', 'ditolak'
   List<Map<String, dynamic>> _barangList = [];
