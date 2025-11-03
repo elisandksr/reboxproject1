@@ -171,7 +171,7 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const kelolabaranguser(),
+                                      builder: (context) => const KelolaBarangUserScreen(),
                                     ),
                                   );
                                 },
