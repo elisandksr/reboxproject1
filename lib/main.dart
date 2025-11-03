@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'login_admin_screen.dart';
 
 void main() {
   runApp(const ReBoxApp());
@@ -19,7 +20,7 @@ class ReBoxApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00736D)),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const AdminLoginScreen(),
     );
   }
 }
