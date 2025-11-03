@@ -102,4 +102,26 @@ class UserData {
       return false;
     }
   }
+
+
+// Method untuk menghapus user (untuk admin)
+  static bool deleteUser(String username) {
+    final cleanUsername = username.trim();
+    try {
+      final userIndex = _registeredUsers.indexWhere(
+        (user) => user['username'] == cleanUsername,
+      );
+      if (userIndex != -1) {
+        _registeredUsers.removeAt(userIndex);
+        print('🗑️ User deleted: $cleanUsername');
+        print('📊 Total users: ${_registeredUsers.length}');
+        return true;
+      }
+      print('❌ User not found: $cleanUsername');
+      return false;
+    } catch (e) {
+      print('❌ Error deleting user: $e');
+      return false;
+    }
+  }
 }
