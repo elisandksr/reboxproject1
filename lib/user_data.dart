@@ -102,4 +102,17 @@ class UserData {
       return false;
     }
   }
+static Future<void> deleteUser(String username) async {
+    final cleanUsername = username.trim();
+    final userIndex = _registeredUsers.indexWhere(
+      (user) => user['username'] == cleanUsername,
+    );
+
+    if (userIndex != -1) {
+      _registeredUsers.removeAt(userIndex);
+      print('🗑️ User "$cleanUsername" berhasil dihapus.');
+    } else {
+      print('⚠️ User "$cleanUsername" tidak ditemukan.');
+    }
+  }
 }

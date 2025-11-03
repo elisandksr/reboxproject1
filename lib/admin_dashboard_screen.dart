@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:latcobareboc/kelola_barang_screen.dart';
 import 'login_admin_screen.dart';
 import 'kelola_pengguna_screen.dart'; 
-import 'kelola_barang_screen.dart';
+import 'kelola_barang_user_screen.dart';
 
 class AdminDashboard extends StatefulWidget {
   final String adminUsername;
@@ -116,7 +115,7 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
                           Text(
                             'Welcome, ${widget.adminUsername}',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 14,
                             ),
                           ),
@@ -244,7 +243,7 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
           border: Border.all(color: Colors.grey[300]!, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -255,7 +254,7 @@ class _AdminDashboardState extends State<AdminDashboard> with SingleTickerProvid
             Container(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Icon(

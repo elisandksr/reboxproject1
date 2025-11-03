@@ -131,7 +131,7 @@ class _KelolaBarangScreenState extends State<KelolaBarangScreen> {
                   Text(
                     'Total: ${_barangList.length} donasi menunggu persetujuan',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                     ),
                   ),
@@ -180,7 +180,7 @@ class _KelolaBarangScreenState extends State<KelolaBarangScreen> {
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
