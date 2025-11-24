@@ -302,7 +302,7 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
                     'category': newDonation['category'],
                     'condition': newDonation['condition'],
                     'isClaimed': false,
-                    'isMyDonation': true, // 🔥 PENTING!
+                    'isMyDonation': true, 
                     'isBase64': newDonation['isBase64'] ?? false,
                   };
 
