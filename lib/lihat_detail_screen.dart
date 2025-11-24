@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class DetailItemScreen extends StatefulWidget {
@@ -183,7 +184,7 @@ class _DetailItemScreenState extends State<DetailItemScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // FOTO PRODUK (gaya marketplace)
+            // FOTO BARANG
             Center(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 280),
@@ -208,10 +209,15 @@ class _DetailItemScreenState extends State<DetailItemScreen> {
                 clipBehavior: Clip.antiAlias,
                 child: AspectRatio(
                   aspectRatio: 4 / 3,
-                  child: Image.asset(
-                    widget.item['image']!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: widget.item['isBase64'] == true && widget.item['image'] != null
+                      ? Image.memory(
+                          base64Decode(widget.item['image']),
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          widget.item['image']!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
             ),
@@ -220,7 +226,7 @@ class _DetailItemScreenState extends State<DetailItemScreen> {
 
             // NAMA BARANG
             Text(
-              widget.item['name']!,
+              widget.item['name'] ?? 'Tanpa Nama',
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -276,46 +282,6 @@ class _DetailItemScreenState extends State<DetailItemScreen> {
                 fontSize: 16.5,
                 color: Color.fromARGB(255, 54, 54, 54),
                 height: 1.5,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // INFORMASI KONTAK TERSEMBUNYI
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange[200]!),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.lock_outline, color: Colors.orange[600], size: 22),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Kontak Pemilik Tersembunyi',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.orange[700],
-                          ),
-                        ),
-                        Text(
-                          'Klik klaim untuk melihat kontak',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ),
 

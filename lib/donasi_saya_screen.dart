@@ -18,68 +18,36 @@ class DonasiSayaScreen extends StatefulWidget {
 }
 
 class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
-  List<Map<String, dynamic>> _myDonations = [];
+  late List<Map<String, dynamic>> _myDonations;
 
   @override
   void initState() {
     super.initState();
-    _updateMyDonations();
+    _refreshMyDonations();
+    print('🔥 DonasiSayaScreen INIT - total items: ${widget.items.length}');
   }
 
-  void _updateMyDonations() {
+  @override
+  void didUpdateWidget(covariant DonasiSayaScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print('🔥 DonasiSayaScreen didUpdateWidget');
+    print('🔥 OLD items: ${oldWidget.items.length}');
+    print('🔥 NEW items: ${widget.items.length}');
+    
+    _refreshMyDonations();
+  }
+
+  void _refreshMyDonations() {
     setState(() {
       _myDonations = widget.items
           .where((item) => item['isMyDonation'] == true)
           .toList();
+      
+      print('🔥 After filter - _myDonations: ${_myDonations.length}');
+      for (var item in _myDonations) {
+        print('  - ${item['name']} (ID: ${item['id']})');
+      }
     });
-  }
-
-  void _addDonation(Map<String, dynamic> newItem) {
-    int newId = widget.items.isEmpty
-        ? 1
-        : widget.items
-                .map((item) => item['id'] as int)
-                .reduce((a, b) => a > b ? a : b) +
-            1;
-
-    final donationItem = {
-      'id': newId,
-      'image': newItem['image'] ?? 'assets/logo_rebox.png',
-      'name': newItem['name'],
-      'desc': newItem['desc'],
-      'contact': newItem['contact'],
-      'category': newItem['category'],
-      'condition': newItem['condition'],
-      'isClaimed': false,
-      'isMyDonation': true,
-      'isBase64': newItem['isBase64'] ?? false,
-    };
-
-    setState(() {
-      widget.items.add(donationItem);
-      _myDonations.add(donationItem);
-    });
-
-    widget.onItemsChanged(widget.items);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text('${newItem['name']} berhasil ditambahkan!'),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(20),
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   void _deleteDonation(int index) {
@@ -131,8 +99,72 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
     );
   }
 
+  Widget _buildImage(Map<String, dynamic> item) {
+    try {
+      final imageData = item['image'];
+
+      if (imageData == null || imageData.toString().isEmpty) {
+        return Container(
+          width: 60,
+          height: 60,
+          color: Colors.grey[300],
+          child: Icon(Icons.image_not_supported, color: Colors.grey[600]),
+        );
+      }
+
+      if (item['isBase64'] == true) {
+        return Image.memory(
+          base64Decode(imageData),
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 60,
+            height: 60,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey[600]),
+          ),
+        );
+      } else {
+        // File path image
+        final file = File(imageData);
+        if (file.existsSync()) {
+          return Image.file(
+            file,
+            width: 60,
+            height: 60,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[300],
+              child: Icon(Icons.broken_image, color: Colors.grey[600]),
+            ),
+          );
+        } else {
+          return Container(
+            width: 60,
+            height: 60,
+            color: Colors.grey[300],
+            child: Icon(Icons.image_not_supported, color: Colors.grey[600]),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error loading image: $e');
+      return Container(
+        width: 60,
+        height: 60,
+        color: Colors.grey[300],
+        child: Icon(Icons.broken_image, color: Colors.grey[600]),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('BUILD DonasiSayaScreen - _myDonations: ${_myDonations.length}');
+    
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: _myDonations.isEmpty
@@ -187,7 +219,7 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
                       child: _buildImage(item),
                     ),
                     title: Text(
-                      item['name'] ?? '',
+                      item['name'] ?? 'Tanpa nama',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -196,26 +228,43 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
-                          item['category'] ?? '',
+                          'Kategori: ${item['category'] ?? '-'}',
                           style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.orange[600],
-                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                            color: Colors.grey[600],
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          item['isClaimed'] == true
-                              ? 'Status: Diklaim'
-                              : 'Status: Menunggu',
+                          'Kondisi: ${item['condition'] ?? '-'}',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
                             color: item['isClaimed'] == true
-                                ? Colors.green[600]
-                                : Colors.grey[500],
-                            fontWeight: FontWeight.w500,
+                                ? Colors.green[100]
+                                : Colors.orange[100],
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            item['isClaimed'] == true
+                                ? '✓ Diklaim'
+                                : '⏳ Menunggu Diklaim',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: item['isClaimed'] == true
+                                  ? Colors.green[700]
+                                  : Colors.orange[700],
+                            ),
                           ),
                         ),
                       ],
@@ -234,7 +283,56 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => TambahDonasiScreen(
-                onDonasiAdded: _addDonation,
+                onDonasiAdded: (newDonation) {
+                  print('🔥 DonasiSayaScreen received newDonation: $newDonation');
+                  
+                  int newId = widget.items.isEmpty
+                      ? 1
+                      : widget.items
+                              .map((item) => item['id'] as int)
+                              .reduce((a, b) => a > b ? a : b) +
+                          1;
+
+                  final donationItem = {
+                    'id': newId,
+                    'image': newDonation['image'],
+                    'name': newDonation['name'],
+                    'desc': newDonation['desc'],
+                    'contact': newDonation['contact'],
+                    'category': newDonation['category'],
+                    'condition': newDonation['condition'],
+                    'isClaimed': false,
+                    'isMyDonation': true, // 🔥 PENTING!
+                    'isBase64': newDonation['isBase64'] ?? false,
+                  };
+
+                  setState(() {
+                    widget.items.add(donationItem);
+                  });
+                  widget.onItemsChanged(widget.items);
+                  _refreshMyDonations();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.white),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                                '${newDonation['name']} berhasil ditambahkan!'),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.green[600],
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      margin: const EdgeInsets.all(20),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
               ),
             ),
           );
@@ -243,61 +341,5 @@ class _DonasiSayaScreenState extends State<DonasiSayaScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
-  }
-
-  // ✅ BAGIAN YANG DITAMBAHKAN UNTUK FIX GAMBAR MERAH / BASE64
-  Widget _buildImage(Map<String, dynamic> item) {
-    try {
-      final imageData = item['image'];
-
-      if (imageData == null || imageData.toString().isEmpty) {
-        return Image.asset(
-          'assets/logo_rebox.png',
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-        );
-      }
-
-      if (item['isBase64'] == true) {
-        // Decode base64 (untuk web & mobile)
-        return Image.memory(
-          base64Decode(imageData),
-          width: 60,
-          height: 60,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Image.asset(
-            'assets/logo_rebox.png',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-          ),
-        );
-      } else {
-        final file = File(imageData);
-        if (file.existsSync()) {
-          return Image.file(
-            file,
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-          );
-        } else {
-          return Image.asset(
-            'assets/logo_rebox.png',
-            width: 60,
-            height: 60,
-            fit: BoxFit.cover,
-          );
-        }
-      }
-    } catch (e) {
-      return Image.asset(
-        'assets/logo_rebox.png',
-        width: 60,
-        height: 60,
-        fit: BoxFit.cover,
-      );
-    }
   }
 }

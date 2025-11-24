@@ -66,7 +66,7 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orangeAccent.withValues(alpha: 0.2),
+                  color: Colors.orangeAccent.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.camera_alt, color: Colors.orange),
@@ -82,7 +82,7 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
               leading: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.orangeAccent.withValues(alpha: 0.2),
+                  color: Colors.orangeAccent.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.photo_library, color: Colors.orange),
@@ -102,7 +102,11 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
   Future<void> _pickImage(ImageSource source) async {
     try {
       final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: source, imageQuality: 80, maxWidth: 1080);
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+        maxWidth: 1080,
+      );
 
       if (pickedFile != null) {
         if (kIsWeb) {
@@ -157,7 +161,10 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
         'condition': _selectedCondition,
         'image': imageData != null ? base64Encode(imageData) : null,
         'isBase64': true,
+        'isMyDonation': true, 
       };
+
+      print('TambahDonasiScreen - newDonation: $newDonation');
 
       widget.onDonasiAdded(newDonation);
       Navigator.pop(context);
@@ -204,96 +211,8 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Foto Barang *',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: _showImageSourceDialog,
-                child: Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[400]!),
-                    image: _imagePath != null
-                        ? DecorationImage(image: FileImage(File(_imagePath!)), fit: BoxFit.cover)
-                        : _webImageBytes != null
-                            ? DecorationImage(image: MemoryImage(_webImageBytes!), fit: BoxFit.cover)
-                            : null,
-                  ),
-                  child: _imagePath == null && _webImageBytes == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_photo_alternate_outlined, size: 50, color: Colors.grey[600]),
-                            const SizedBox(height: 12),
-                            Text('Ketuk untuk unggah foto',
-                                style: TextStyle(color: Colors.grey[700], fontSize: 15, fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 4),
-                            Text('Ambil foto atau pilih dari galeri',
-                                style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-                          ],
-                        )
-                      : Stack(
-                          children: [
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: GestureDetector(
-                                onTap: _removeImage,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red[600],
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(Icons.delete_outline, color: Colors.white, size: 20),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 10,
-                              right: 10,
-                              child: GestureDetector(
-                                onTap: _showImageSourceDialog,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange[600],
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.3),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.edit, color: Colors.white, size: 16),
-                                      SizedBox(width: 4),
-                                      Text('Ganti Foto',
-                                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                ),
-              ),
-              const SizedBox(height: 25),
+              _buildImagePicker(),
+              _buildNameField(),
               _buildDescField(),
               _buildCategoryDropdown(),
               _buildConditionDropdown(),
@@ -309,8 +228,11 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
                     elevation: 2,
                   ),
                   onPressed: _submitForm,
-                  child: const Text('Tambahkan Donasi',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    'Tambahkan Donasi',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -320,6 +242,132 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
       ),
     );
   }
+
+  Widget _buildImagePicker() => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Foto Barang *',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: _showImageSourceDialog,
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[400]!),
+                image: _imagePath != null
+                    ? DecorationImage(image: FileImage(File(_imagePath!)), fit: BoxFit.cover)
+                    : _webImageBytes != null
+                        ? DecorationImage(image: MemoryImage(_webImageBytes!), fit: BoxFit.cover)
+                        : null,
+              ),
+              child: _imagePath == null && _webImageBytes == null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_photo_alternate_outlined,
+                            size: 50, color: Colors.grey[600]),
+                        const SizedBox(height: 12),
+                        Text('Ketuk untuk unggah foto',
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 4),
+                        Text('Ambil foto atau pilih dari galeri',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                      ],
+                    )
+                  : Stack(
+                      children: [
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: _removeImage,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.red[600],
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(Icons.delete_outline,
+                                  color: Colors.white, size: 20),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: _showImageSourceDialog,
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.orange[600],
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.edit, color: Colors.white, size: 16),
+                                  SizedBox(width: 4),
+                                  Text('Ganti Foto',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(height: 25),
+        ],
+      );
+
+  Widget _buildNameField() => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Nama Barang *',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              hintText: 'Contoh: Baju Bekas Layak Pakai',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            validator: (value) =>
+                value == null || value.isEmpty ? 'Nama barang tidak boleh kosong' : null,
+          ),
+          const SizedBox(height: 20),
+        ],
+      );
 
   Widget _buildDescField() => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,7 +449,8 @@ class _TambahDonasiScreenState extends State<TambahDonasiScreen> {
               filled: true,
               fillColor: Colors.white,
             ),
-            validator: (value) => value == null || value.isEmpty ? 'Nomor kontak tidak boleh kosong' : null,
+            validator: (value) =>
+                value == null || value.isEmpty ? 'Nomor kontak tidak boleh kosong' : null,
           ),
         ],
       );

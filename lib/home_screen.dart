@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'donasi_saya_screen.dart';
 import 'profil_saya_screen.dart';
 import 'lihat_detail_screen.dart';
+import 'tambah_donasi_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? username;
@@ -20,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   List<Map<String, dynamic>> items = [
     {
-      'id': 1,
+             'id': 1,
       'image': 'assets/baju1.jpeg',
       'name': 'Baju Bekas Layak Pakai',
       'desc': 'Masih bagus, bersih, dan jarang dipakai. Cocok untuk donasi ke panti asuhan atau wilayah bencana. Bahan katun lembut dan tebal.',
@@ -84,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 300),
     );
     _animationController.forward();
+    print('HomeScreen initState - items: ${items.length}');
   }
 
   @override
@@ -94,6 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _onItemTapped(int index) {
+    print('Tab tapped: $index');
     setState(() {
       _selectedIndex = index;
     });
@@ -131,6 +135,63 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  int _generateNewId() {
+    if (items.isEmpty) return 1;
+    int maxId = items.map((item) => item['id'] as int).reduce((a, b) => a > b ? a : b);
+    return maxId + 1;
+  }
+
+  void _addDonation(Map<String, dynamic> newDonation) {
+    print('_addDonation called');
+    print('newDonation: $newDonation');
+
+    int newId = _generateNewId();
+    print(' Generated ID: $newId');
+
+    final donationItem = {
+      'id': newId,
+      'image': newDonation['image'] ?? 'assets/logo_rebox.png',
+      'name': newDonation['name'],
+      'desc': newDonation['desc'],
+      'contact': newDonation['contact'],
+      'category': newDonation['category'],
+      'condition': newDonation['condition'],
+      'isClaimed': false,
+      'isMyDonation': true, 
+      'isBase64': newDonation['isBase64'] ?? false,
+    };
+
+    print(' Final donationItem: $donationItem');
+
+    setState(() {
+      items.add(donationItem);
+      print(' Total items setelah add: ${items.length}');
+      print(' Items sekarang: ');
+      for (var item in items) {
+        print('  - ${item['name']} (isMyDonation: ${item['isMyDonation']})');
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text('${newDonation['name']} berhasil ditambahkan!'),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(20),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   Widget _buildItemCard(Map<String, dynamic> item) {
     final isClaimed = item['isClaimed'] as bool;
 
@@ -155,10 +216,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: AspectRatio(
                   aspectRatio: 1,
-                  child: Image.asset(
-                    item['image']!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: item['isBase64'] == true && item['image'] != null
+                      ? Image.memory(
+                          base64Decode(item['image']),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Image.asset(
+                            'assets/logo_rebox.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          item['image']!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey[300],
+                            child: Icon(Icons.image_not_supported,
+                                color: Colors.grey[600]),
+                          ),
+                        ),
                 ),
               ),
               Positioned(
@@ -192,72 +267,55 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   left: 10,
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.green,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 4,
-                        ),
-                      ],
                     ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 16,
-                    ),
+                    child: const Icon(Icons.check, color: Colors.white, size: 16),
                   ),
                 ),
             ],
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item['name']!,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item['desc']!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: const Color.fromARGB(255, 59, 59, 59),
-                            height: 1.3,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                  Text(
+                    item['name'] ?? 'Tanpa Nama',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Colors.black87,
+                      height: 1.2,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
+                  Text(
+                    item['desc'] ?? '-',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color.fromARGB(255, 59, 59, 59),
+                      height: 1.3,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
                   SizedBox(
                     width: double.infinity,
                     height: 36,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isClaimed ? Colors.grey[400] : Colors.orange[600],
+                        backgroundColor:
+                            isClaimed ? Colors.grey[400] : Colors.orange[600],
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         elevation: 0,
-                        padding: EdgeInsets.zero,
                       ),
                       onPressed: isClaimed ? null : () => _showItemDetail(item),
                       child: Text(
@@ -282,6 +340,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    print('HomeScreen build - selectedIndex: $_selectedIndex, items: ${items.length}');
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -304,7 +364,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             fontWeight: FontWeight.w900,
             letterSpacing: 2,
             fontSize: 24,
-            fontFamily: 'Impact',
           ),
         ),
         centerTitle: true,
@@ -314,11 +373,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         index: _selectedIndex,
         children: [
           _buildHomePage(),
-          DonasiSayaScreen(items: items, onItemsChanged: (newItems) {
-            setState(() {
-              items = newItems;
-            });
-          }),
+          DonasiSayaScreen(
+            items: items,
+            onItemsChanged: (newItems) {
+              print('onItemsChanged called - newItems: ${newItems.length}');
+              setState(() {
+                items = newItems;
+              });
+            },
+          ),
           ProfilSayaScreen(username: widget.username),
         ],
       ),
@@ -361,6 +424,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ],
         ),
       ),
+      floatingActionButton: _selectedIndex == 1
+          ? FloatingActionButton(
+              backgroundColor: Colors.orange[600],
+              child: const Icon(Icons.add, color: Colors.white),
+              onPressed: () {
+                print('FAB pressed di tab Donasi Saya');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TambahDonasiScreen(
+                      onDonasiAdded: _addDonation,
+                    ),
+                  ),
+                );
+              },
+            )
+          : null,
     );
   }
 
@@ -428,10 +508,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           decoration: InputDecoration(
                             hintText: 'Cari barang bekas...',
                             hintStyle: TextStyle(color: Colors.grey[400]),
-                            prefixIcon: Icon(Icons.search, color: Colors.orange[600]),
+                            prefixIcon:
+                                Icon(Icons.search, color: Colors.orange[600]),
                             suffixIcon: _searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear, color: Colors.grey),
+                                    icon: const Icon(Icons.clear,
+                                        color: Colors.grey),
                                     onPressed: () {
                                       setState(() {
                                         _searchController.clear();
@@ -448,7 +530,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ],
                   ),
                 ),
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -459,7 +540,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ? SliverToBoxAdapter(
                   child: Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 50),
                         Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
